@@ -1,0 +1,21 @@
+from pathlib import Path
+
+def get_file_content(working_directory, file_path):
+    working_directory = Path(working_directory).resolve()
+    target_path = (working_directory / file_path).resolve()
+
+    # Prevent access outside the working directory
+    if working_directory not in target_path.parents and working_directory != target_path:
+        return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
+
+    if not target_path.is_file():
+        return f'Error: File not found or is not a regular file: "{file_path}"'
+
+    try:
+        content = target_path.read_text()
+        if len(content) > 10000:
+            content = content[:10000] + f"[...File '{target_path.name}' truncated at 10000 characters]"
+    except Exception as e:
+        return f'Error: {e}'
+
+    return content
