@@ -1,4 +1,6 @@
 from pathlib import Path
+from google import genai
+from google.genai import types
 
 def get_file_content(working_directory, file_path):
     working_directory = Path(working_directory).resolve()
@@ -19,3 +21,17 @@ def get_file_content(working_directory, file_path):
         return f'Error: {e}'
 
     return content
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Displays the content of a file, truncated if above 10,000 characters long. Constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path to the file, relative to the working directory.",
+            ),
+        },
+    ),
+)

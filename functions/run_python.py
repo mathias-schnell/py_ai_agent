@@ -1,4 +1,6 @@
 from pathlib import Path
+from google import genai
+from google.genai import types
 import subprocess
 import sys
 
@@ -31,3 +33,17 @@ def run_python_file(working_directory, file_path):
         return f"Error: executing Python file: {e}"
     
     return result_str
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Runs the Python file at the given file path, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path to the file, relative to the working directory.",
+            ),
+        },
+    ),
+)

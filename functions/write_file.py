@@ -1,4 +1,6 @@
 from pathlib import Path
+from google import genai
+from google.genai import types
 
 def write_file(working_directory, file_path, content):
     working_directory = Path(working_directory).resolve()
@@ -14,3 +16,21 @@ def write_file(working_directory, file_path, content):
         return f'Error: {e}'
 
     return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Writes content to a file. Overwrites existing content if the file already exists. Constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path to the file, relative to the working directory.",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="The file's contents.",
+            ),
+        },
+    ),
+)
