@@ -7,8 +7,13 @@ from functions.get_files_info import schema_get_files_info
 from functions.get_file_content import schema_get_file_content
 from functions.write_file import schema_write_file
 from functions.run_python import schema_run_python_file
+from functions.call_function import call_function
 
 load_dotenv()
+
+verbose = False
+if "--verbose" in sys.argv:
+    verbose = True
 
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
@@ -52,10 +57,30 @@ else:
 
 if response.function_calls is not None and len(response.function_calls) > 0:
     for func_call in response.function_calls:
-        print(f"Calling function: {func_call.name}({func_call.args})")
+        result = call_function(func_call, verbose)
+        fatal_ex = False
+
+        if not hasattr(result, "parts"):
+            fatal_ex = True
+        if not isinstance(result.parts, list) or len(result.parts) == 0:
+            fatal_ex = True
+        part = result.parts[0]
+        if not hasattr(part, "function_response"):
+            fatal_ex = True
+        if not hasattr(part.function_response, "response"):
+            fatal_ex = True
+        
+        if fatal_ex:
+            raise Exception("Fatal Exception")
+        elif verbose:
+            print(f"-> {result.parts[0].function_response.response}")
+        
+        
+
+
 else:
     print(response.text)
-if "--verbose" in sys.argv:
+if verbose:
     print(f"User prompt: {sys.argv[1]}")
     print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
     print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
